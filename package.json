@@ -1,0 +1,28 @@
+{
+  "name": "homebridge-http-garagedoorcontroller",
+  "version": "1.0.5",
+  "description": "Exposes a garage door accessory and garage light to HomeBridge that operates via HTTP requests",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "homebridge-plugin",
+    "homebridge",
+    "garagedoor"
+  ],
+  "author": "Warren Ashcroft <w.ashcroft@washcroft.com>",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/washcroft/homebridge-http-garagedoorcontroller.git#1.0.1"
+  },
+  "bugs": {
+    "url": "https://github.com/washcroft/homebridge-http-garagedoorcontroller/issues"
+  },
+  "homepage": "https://github.com/washcroft/homebridge-http-garagedoorcontroller",
+  "engines": {
+    "node": ">=6.10.0",
+    "homebridge": ">=0.4.10"
+  }
+}
