@@ -12,7 +12,7 @@ The Arduino controller also uses GPIO inputs to report the state of the garage d
 
 My Arduino project which accompanies this HomeBridge plugin can be found at [HttpGarageDoorController](https://github.com/washcroft/HttpGarageDoorController).
 
-# configuration
+# Configuration
 
 HomeBridge configuration sample:
 
