@@ -1,6 +1,8 @@
 # homebridge-http-garagedoorcontroller
 An HTTP based Garage Door/Light plugin for [HomeBridge](https://github.com/nfarina/homebridge)
 
+![Demo](https://github.com/washcroft/HttpGarageDoorController/raw/master/reference/demo.gif "Demo")
+
 # About
 This HomeBridge (HomeKit) plugin exposes a garage door accessory and garage light, allowing control of your garage door and/or garage light via HTTP requests. State reporting is also supported but it is optional.
 
