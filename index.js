@@ -1,5 +1,6 @@
 var locks = require("locks");
-var mutex = locks.createMutex();
+var checkStateMutex = locks.createMutex();
+var httpRequestMutex = locks.createMutex();
 
 var request = require("request");
 var Service, Accessory, Characteristic, DoorState;
@@ -192,8 +193,8 @@ HttpGarageDoorControllerAccessory.prototype = {
 			this._lightCurrentState = false;
 			this._setLightCurrentState(this._lightCurrentState, true);
 		}
-
-		if (this._hasDoorState() || this._hasLightState()) {
+		
+		if (this._hasStates()) {
 			this._checkStates(true);
 		}
 	},
@@ -201,17 +202,13 @@ HttpGarageDoorControllerAccessory.prototype = {
 	getDoorCurrentState: function(callback) {
 		this.log.debug("Entered getDoorCurrentState()");
 
-		var that = this;
-		this._determineDoorState(function(error, state) {
-			if (error) {
-				var error = new Error("ERROR in getDoorCurrentState() - " + error.message);
-				that.log.error(error.message);
-				callback(error);
-				return;
-			}
+		var error = null;
+		if (this._hasStates() && ((Date.now() - this._doorCurrentStateSetAt) >= (this.httpStatusPollMilliseconds * 3))) {
+			error = new Error("The Garage Door current state is unknown (last known: " + this._doorStateToString(this._doorCurrentState) + "), it hasn't been reported since " + (new Date(this._doorCurrentStateSetAt)).toString());
+			this.log.error(error.message);
+		}
 
-			callback(null, state);
-		});
+		callback(error, this._doorCurrentState);
 	},
 
 	getDoorTargetState: function(callback) {
@@ -256,17 +253,13 @@ HttpGarageDoorControllerAccessory.prototype = {
 	getLightCurrentState: function(callback) {
 		this.log.debug("Entered getLightCurrentState()");
 
-		var that = this;
-		this._determineLightState(function(error, state) {
-			if (error) {
-				var error = new Error("ERROR in getLightCurrentState() - " + error.message);
-				that.log.error(error.message);
-				callback(error);
-				return;
-			}
+		var error = null;
+		if (this._hasStates() && ((Date.now() - this._lightCurrentStateSetAt) >= (this.httpStatusPollMilliseconds * 3))) {
+			error = new Error("The Garage Light current state is unknown (last known: " + this._lightStateToString(this._lightCurrentState) + "), it hasn't been reported since " + (new Date(this._lightCurrentStateSetAt)).toString());
+			this.log.error(error.message);
+		}
 
-			callback(null, state);
-		});
+		callback(error, this._lightCurrentState);
 	},
 
 	setLightCurrentState: function(newState, callback) {
@@ -299,31 +292,42 @@ HttpGarageDoorControllerAccessory.prototype = {
 		var that = this;
 
 		if (this._hasDoorState()) {
-			this._determineDoorState(function(error, doorState, lightState) {
-				if (error) {
-					that.log.error("ERROR in _checkStates() - " + error.message);
-				} else {
-					that._setDoorCurrentState(doorState, initial);
+			checkStateMutex.lock(function() {
+				that._determineDoorState(function(error, doorState, lightState) {
+					if (error) {
+						that.log.error("ERROR in _checkStates() - " + error.message);
+					} else {
+						that._setDoorCurrentState(doorState, initial);
 
-					if (lightState != null) {
-						that._setLightCurrentState(lightState, initial);
+						if (lightState != null) {
+							that._setLightCurrentState(lightState, initial);
+						}
 					}
-				}
+					
+					checkStateMutex.unlock();
+				});
 			});
 		}
 
 		// If the door state and light state share the same API, the light state will have been set above
 		if (this._hasLightState() && (this.doorStateUrl != this.lightStateUrl)) {
-			this._determineLightState(function(error, lightState) {
-				if (error) {
-					that.log.error("ERROR in _checkStates() - " + error.message);
-				} else {
-					that._setLightCurrentState(lightState, initial);
-				}
+			checkStateMutex.lock(function() {
+				that._determineLightState(function(error, lightState) {
+					if (error) {
+						that.log.error("ERROR in _checkStates() - " + error.message);
+					} else {
+						that._setLightCurrentState(lightState, initial);
+					}
+					
+					checkStateMutex.unlock();
+				});
 			});
 		}
 
-		setTimeout(that._checkStates.bind(that), that.httpStatusPollMilliseconds);
+		checkStateMutex.lock(function() {
+			setTimeout(that._checkStates.bind(that), that.httpStatusPollMilliseconds);
+			checkStateMutex.unlock();
+		});
 	},
 
 	_determineDoorState: function(done) {
@@ -381,7 +385,8 @@ HttpGarageDoorControllerAccessory.prototype = {
 
 	_setDoorCurrentState: function(state, initial, isFromTargetState) {
 		this.log.debug("Entered _setDoorCurrentState(state: %s, initial: %s, isFromTargetState: %s)", this._doorStateToString(state), (initial || false), (isFromTargetState || false));
-
+		this._doorCurrentStateSetAt = Date.now();
+		
 		if ((this._doorCurrentState == state) && (!initial)) {
 			return;
 		}
@@ -402,6 +407,7 @@ HttpGarageDoorControllerAccessory.prototype = {
 
 	_setDoorTargetState: function(state, initial, isFromCurrentState) {
 		this.log.debug("Entered _setDoorTargetState(state: %s, initial: %s, isFromCurrentState: %s)", this._doorStateToString(state), (initial || false), (isFromCurrentState || false));
+		this._doorTargetStateSetAt = Date.now();
 
 		if ((this._doorTargetState == state) && (!initial)) {
 			return;
@@ -423,6 +429,7 @@ HttpGarageDoorControllerAccessory.prototype = {
 
 	_setLightCurrentState: function(state, initial) {
 		this.log.debug("Entered _setLightCurrentState(state: %s, initial: %s)", state, (initial || false));
+		this._lightCurrentStateSetAt = Date.now();
 
 		if ((this._lightCurrentState == state) && (!initial)) {
 			return;
@@ -480,7 +487,7 @@ HttpGarageDoorControllerAccessory.prototype = {
 	},
 
 	_httpRequest: function(method, url, expectedJsonField, expectedJsonFieldValue, done) {
-		mutex.lock(function() {
+		httpRequestMutex.lock(function() {
 			var options = {
 				timeout: 5000,
 				method: method,
@@ -525,7 +532,7 @@ HttpGarageDoorControllerAccessory.prototype = {
 					}
 				}
 
-				mutex.unlock();
+				httpRequestMutex.unlock();
 				done(error, response, ((json != null) ? json : body));
 			});
 		}.bind(this));
