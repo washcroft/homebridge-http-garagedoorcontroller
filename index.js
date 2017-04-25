@@ -51,6 +51,12 @@ function HttpGarageDoorControllerAccessory(log, config) {
 		configurationValid = false;
 	}
 
+	this.httpRequestTimeoutMilliseconds = parseInt(getConfigValue(config, "httpRequestTimeoutMilliseconds", 10000));
+	if (!this.httpRequestTimeoutMilliseconds || isNaN(this.httpRequestTimeoutMilliseconds)) {
+		this.log.error("ERROR - Missing or invalid configuration field 'httpRequestTimeoutMilliseconds'");
+		configurationValid = false;
+	}
+
 	this.httpHeaderName = getConfigValue(config, "httpHeaderName", null);
 	if (this.httpHeaderName) {
 		this.httpHeaderValue = getConfigValue(config, "httpHeaderValue", null);
@@ -501,8 +507,8 @@ HttpGarageDoorControllerAccessory.prototype = {
 	_httpRequest: function(method, url, expectedJsonField, expectedJsonFieldValue, done) {
 		httpRequestMutex.lock(function() {
 			var options = {
-				timeout: 5000,
 				method: method,
+				timeout: this.httpRequestTimeoutMilliseconds,
 				url: "http://" + this.httpHost + ((this.httpPort == 80) ? "" : ":" + this.httpPort) + url
 			};
 

@@ -26,6 +26,7 @@ HomeBridge configuration sample:
             "httpHost": "garagedoorcontroller.local",
             "httpPort": 80,
             "httpStatusPollMilliseconds": 4000,
+            "httpRequestTimeoutMilliseconds": 10000,
             "httpHeaderName": "X-API-Key",
             "httpHeaderValue": "MyAPIKey",
             
@@ -52,6 +53,7 @@ Fields:
 * httpHost - The hostname or IP address of the HTTP web server controlling the garage door operator
 * httpPort - The TCP port the HTTP web server is listening on (default 80)
 * httpStatusPollMilliseconds - The number of milliseconds to wait between requests when polling for updated statuses
+* httpRequestTimeoutMilliseconds - The number of milliseconds to wait for an HTTP request to complete before timing out
 * httpHeaderName - The name of an HTTP header to be included with every request (optional)
 * httpHeaderValue - The value of the above HTTP header to be included with every request (optional)
 
