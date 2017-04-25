@@ -224,7 +224,7 @@ HttpGarageDoorControllerAccessory.prototype = {
 			return;
 		}
 
-		this.log.info("Received request to operate the Garage Door: %s (currently %s, target %s)", this._doorStateToString(newState), this._doorStateToString(this._doorCurrentState), this._doorStateToString(this._doorTargetState));
+		this.log.info("Received request to operate the Garage Door: %s (currently: %s, target: %s)", this._doorStateToString(newState), this._doorStateToString(this._doorCurrentState), this._doorStateToString(this._doorTargetState));
 
 		var that = this;
 		this._httpRequest("PUT", (newState == DoorState.OPEN ? this.doorOpenUrl : this.doorCloseUrl), this.doorSuccessField, true, function(error, response, json) {
@@ -270,7 +270,7 @@ HttpGarageDoorControllerAccessory.prototype = {
 			return;
 		}
 
-		this.log.info("Received request to operate the Garage Light: %s (currently %s)", (newState ? "ON" : "OFF"), this._lightCurrentState);
+		this.log.info("Received request to operate the Garage Light: %s (currently: %s)", this._lightStateToString(newState), this._lightStateToString(this._lightCurrentState));
 
 		var that = this;
 		this._httpRequest("PUT", (newState ? this.lightOnUrl : this.lightOffUrl), this.lightSuccessField, true, function(error, response, json) {
@@ -435,7 +435,7 @@ HttpGarageDoorControllerAccessory.prototype = {
 			return;
 		}
 
-		this.log.info("%s Garage Light state is: %s", (initial ? "INITIAL" : "NEW"), state);
+		this.log.info("%s Garage Light state is: %s", (initial ? "INITIAL" : "NEW"), this._lightStateToString(state));
 
 		this._lightCurrentState = state;
 		this.garageLightCurrentState.setValue(this._lightCurrentState);
@@ -458,6 +458,14 @@ HttpGarageDoorControllerAccessory.prototype = {
 		}
 	},
 
+	_lightStateToString: function(lightState) {
+		if (lightState) {
+			return "ON";
+		} else {
+			return "OFF";
+		}
+	},
+
 	_doorStateToState: function(doorState) {
 		switch (doorState.toUpperCase()) {
 			case "OPEN":
@@ -476,6 +484,10 @@ HttpGarageDoorControllerAccessory.prototype = {
 			default:
 				return null;
 		}
+	},
+
+	_hasStates: function() {
+		return (this._hasDoorState() || this._hasLightState());
 	},
 
 	_hasDoorState: function() {
@@ -514,20 +526,21 @@ HttpGarageDoorControllerAccessory.prototype = {
 
 					if ((response.statusCode < 200) || (response.statusCode > 299)) {
 						error = new Error("The status code of the HTTP response was unexpected: " + response.statusCode);
-					}
+					} else {
+						try {
+							json = JSON.parse(body);
+						} catch (jsonError) {
+							json = null;
+							that.log(body);
+							error = new Error("The JSON body of the HTTP response could not be parsed: " + jsonError.message);
+						}
 
-					try {
-						json = JSON.parse(body);
-					} catch (jsonError) {
-						json = null;
-						error = new Error("The JSON body of the HTTP response could not be parsed: " + jsonError.message);
-					}
-
-					if ((json != null) && (expectedJsonField != null)) {
-						if (!json.hasOwnProperty(expectedJsonField)) {
-							error = new Error("The JSON body of the HTTP response does not contain the field: " + expectedJsonField);
-						} else if ((expectedJsonFieldValue != null) && (json[expectedJsonField] != expectedJsonFieldValue)) {
-							error = new Error("The JSON field value of the HTTP response was unexpected: " + success);
+						if ((json != null) && (expectedJsonField != null)) {
+							if (!json.hasOwnProperty(expectedJsonField)) {
+								error = new Error("The JSON body of the HTTP response does not contain the field: " + expectedJsonField);
+							} else if ((expectedJsonFieldValue != null) && (json[expectedJsonField] != expectedJsonFieldValue)) {
+								error = new Error("The JSON field value of the HTTP response was unexpected: " + success);
+							}
 						}
 					}
 				}
