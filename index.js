@@ -484,7 +484,7 @@ HttpGarageDoorControllerAccessory.prototype = {
 		}
 
 		// If the door state and light state share the same API, the light state will have been set above
-		if (!this._hasDualState()) {
+		if (!this._hasDualState() && this.lightName) {
 			checkStateMutex.lock(function() {
 				that._determineLightState(function(error, lightState) {
 					if (error) {
