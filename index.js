@@ -185,38 +185,38 @@ function HttpGarageDoorControllerAccessory(log, config) {
 				if (this.apiConfig.doorStateUrl) {
 					this.apiConfig.doorStateMethod = getConfigValue(config.apiConfig, "doorStateMethod", null);
 					if (!this.apiConfig.doorStateMethod || ((this.apiConfig.doorStateMethod != "GET") && (this.apiConfig.doorStateMethod != "POST") && (this.apiConfig.doorStateMethod != "PUT"))) {
-						this.log.error("ERROR - Missing or invalid configuration field 'doorStateMethod' when 'doorStateUrl' is set");
+						this.log.error("ERROR - Missing or invalid configuration field 'apiConfig.doorStateMethod' when 'apiConfig.doorStateUrl' is set");
 						configurationValid = false;
 					}
 				} else {
-					this.doorOperationSeconds = parseInt(getConfigValue(config.apiConfig, "doorOperationSeconds", 0)) || 0;
+					this.doorOperationSeconds = parseInt(getConfigValue(config, "doorOperationSeconds", 0)) || 0;
 					if (!this.doorOperationSeconds || (this.doorOperationSeconds <= 0)) {
-						this.log.error("ERROR - Missing or invalid configuration field 'doorOperationSeconds' when 'doorStateUrl' is not set");
+						this.log.error("ERROR - Missing or invalid configuration field 'doorOperationSeconds' when 'apiConfig.doorStateUrl' is not set");
 						configurationValid = false;
 					}
 				}
 
 				this.apiConfig.doorOpenMethod = getConfigValue(config.apiConfig, "doorOpenMethod", null);
 				if (!this.apiConfig.doorOpenMethod || ((this.apiConfig.doorOpenMethod != "GET") && (this.apiConfig.doorOpenMethod != "POST") && (this.apiConfig.doorOpenMethod != "PUT"))) {
-					this.log.error("ERROR - Missing or invalid configuration field 'doorOpenMethod'");
+					this.log.error("ERROR - Missing or invalid configuration field 'apiConfig.doorOpenMethod'");
 					configurationValid = false;
 				}
 
 				this.apiConfig.doorOpenUrl = getConfigValue(config.apiConfig, "doorOpenUrl", null);
 				if (!this.apiConfig.doorOpenUrl) {
-					this.log.error("ERROR - Missing or invalid configuration field 'doorOpenUrl'");
+					this.log.error("ERROR - Missing or invalid configuration field 'apiConfig.doorOpenUrl'");
 					configurationValid = false;
 				}
 
 				this.apiConfig.doorCloseMethod = getConfigValue(config.apiConfig, "doorCloseMethod", null);
 				if (!this.apiConfig.doorCloseMethod || ((this.apiConfig.doorCloseMethod != "GET") && (this.apiConfig.doorCloseMethod != "POST") && (this.apiConfig.doorCloseMethod != "PUT"))) {
-					this.log.error("ERROR - Missing or invalid configuration field 'doorCloseMethod'");
+					this.log.error("ERROR - Missing or invalid configuration field 'apiConfig.doorCloseMethod'");
 					configurationValid = false;
 				}
 
 				this.apiConfig.doorCloseUrl = getConfigValue(config.apiConfig, "doorCloseUrl", null);
 				if (!this.apiConfig.doorCloseUrl) {
-					this.log.error("ERROR - Missing or invalid configuration field 'doorCloseUrl'");
+					this.log.error("ERROR - Missing or invalid configuration field 'apiConfig.doorCloseUrl'");
 					configurationValid = false;
 				}
 
@@ -225,32 +225,32 @@ function HttpGarageDoorControllerAccessory(log, config) {
 					if (this.apiConfig.lightStateUrl) {
 						this.apiConfig.lightStateMethod = getConfigValue(config.apiConfig, "lightStateMethod", null);
 						if (!this.apiConfig.lightStateMethod || ((this.apiConfig.lightStateMethod != "GET") && (this.apiConfig.lightStateMethod != "POST") && (this.apiConfig.lightStateMethod != "PUT"))) {
-							this.log.error("ERROR - Missing or invalid configuration field 'lightStateMethod' when 'lightStateUrl' is set");
+							this.log.error("ERROR - Missing or invalid configuration field 'apiConfig.lightStateMethod' when 'apiConfig.lightStateUrl' is set");
 							configurationValid = false;
 						}
 					}
 
 					this.apiConfig.lightOnMethod = getConfigValue(config.apiConfig, "lightOnMethod", null);
 					if (!this.apiConfig.lightOnMethod || ((this.apiConfig.lightOnMethod != "GET") && (this.apiConfig.lightOnMethod != "POST") && (this.apiConfig.lightOnMethod != "PUT"))) {
-						this.log.error("ERROR - Missing or invalid configuration field 'lightOnMethod' when 'lightName' is set");
+						this.log.error("ERROR - Missing or invalid configuration field 'apiConfig.lightOnMethod' when 'lightName' is set");
 						configurationValid = false;
 					}
 
 					this.apiConfig.lightOnUrl = getConfigValue(config.apiConfig, "lightOnUrl", null);
 					if (!this.apiConfig.lightOnUrl) {
-						this.log.error("ERROR - Missing or invalid configuration field 'lightOnUrl' when 'lightName' is set");
+						this.log.error("ERROR - Missing or invalid configuration field 'apiConfig.lightOnUrl' when 'lightName' is set");
 						configurationValid = false;
 					}
 
 					this.apiConfig.lightOffMethod = getConfigValue(config.apiConfig, "lightOffMethod", null);
 					if (!this.apiConfig.lightOffMethod || ((this.apiConfig.lightOffMethod != "GET") && (this.apiConfig.lightOffMethod != "POST") && (this.apiConfig.lightOffMethod != "PUT"))) {
-						this.log.error("ERROR - Missing or invalid configuration field 'lightOffMethod' when 'lightName' is set");
+						this.log.error("ERROR - Missing or invalid configuration field 'apiConfig.lightOffMethod' when 'lightName' is set");
 						configurationValid = false;
 					}
 
 					this.apiConfig.lightOffUrl = getConfigValue(config.apiConfig, "lightOffUrl", null);
 					if (!this.apiConfig.lightOffUrl) {
-						this.log.error("ERROR - Missing or invalid configuration field 'lightOffUrl' when 'lightName' is set");
+						this.log.error("ERROR - Missing or invalid configuration field 'apiConfig.lightOffUrl' when 'lightName' is set");
 						configurationValid = false;
 					}
 				}
