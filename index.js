@@ -154,6 +154,10 @@ function HttpGarageDoorControllerAccessory(log, config) {
 		switch (this.apiConfig.apiType) {
 			case "HttpGarageDoorController":
 				this.httpSsl = false;
+				this.httpHeaderName = "X-API-Key";
+				
+				this.oauthToken = "";
+				this.oauthTokenSecret = "";
 				this.oauthSignatureMethod = "HMAC-SHA256";
 
 				this.apiConfig.doorSuccessField = "success";
@@ -309,6 +313,7 @@ HttpGarageDoorControllerAccessory.prototype = {
 
 			if (this.garageDoorService) {
 				this.accessoryInformationService.setCharacteristic(Characteristic.Name, this.name);
+				this.accessoryInformationService.setCharacteristic(Characteristic.FirmwareRevision, this.version);
 				this.accessoryInformationService.setCharacteristic(Characteristic.SerialNumber, this.garageDoorService.UUID);
 			}
 		}
@@ -705,7 +710,7 @@ HttpGarageDoorControllerAccessory.prototype = {
 	_httpRequest: function(method, url, expectedJsonField, expectedJsonFieldValue, expectedContent, done) {
 		httpRequestMutex.lock(function() {
 			method = method.toUpperCase();
-			url = (this.httpSsl ? "httpSsl" : "http") + "://" + this.httpHost + ((!this.httpSsl && this.httpPort == 80) || (this.httpSsl && this.httpPort == 443) ? "" : ":" + this.httpPort) + url;
+			url = (this.httpSsl ? "https" : "http") + "://" + this.httpHost + ((!this.httpSsl && this.httpPort == 80) || (this.httpSsl && this.httpPort == 443) ? "" : ":" + this.httpPort) + url;
 
 			if (this.oauthAuthentication) {
 				var query = "";
