@@ -1,6 +1,6 @@
 {
   "name": "homebridge-http-garagedoorcontroller",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "This HomeBridge plugin exposes a garage door accessory and optional garage light, allowing control of your garage door and/or garage light via standard HTTP requests, from within the Apple ecosystem. Since security is important here, both API Key header and OAuth 1.0a signing/authentication is supported.",
   "main": "index.js",
   "scripts": {
